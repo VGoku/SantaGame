@@ -1,50 +1,285 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Santa’s Sleigh</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<canvas id="c"></canvas>
-<canvas id="rainFx"></canvas>
-<div id="blackout"></div>
-<div class="panel" id="stats">
- <div class="stat"><span>Score</span><b id="score">0</b></div>
- <div class="stat"><span>Gifts delivered</span><b id="delivered">0</b></div>
- <div class="stat"><span>Oopsies</span><b id="misses">0</b></div>
- <div class="stat"><span>Candy canes 🍬</span><b id="canes">0</b></div>
- <div class="stat"><span>Power-ups</span><b id="power">—</b></div>
- <div class="stat"><span>Lives</span><b id="lives">❤️❤️❤️</b></div>
- <div class="stat"><span>Distance</span><b id="dist">0 m</b></div>
- <div class="stat"><span>Best</span><b id="best">0 m</b></div>
-</div>
-<div class="panel" id="quip"><span id="quipText">🎁 Line up the green ring, then hit <b>Space</b></span><small>Gold beacons = houses ahead</small></div>
-<div class="panel" id="soundBtn">🔊 Sound: ON</div>
-<div class="panel" id="musicBtn">🎵 Music: ON</div>
-<div class="panel" id="camBtn">📸 Front cam: OFF</div>
-<div class="panel" id="pauseBtn">⏸ Pause (P)</div>
-<div class="panel" id="radar"><div class="rl">HOUSES AHEAD</div></div>
-<div class="panel" id="hint"><kbd>A</kbd><kbd>D</kbd> steer · <kbd>W</kbd><kbd>S</kbd> speed · <kbd>Space</kbd> drop · <kbd>M</kbd> music · <kbd>C</kbd> front cam · <kbd>X</kbd> coal · <kbd>P</kbd> pause · <kbd>R</kbd> restart</div>
-<div id="toast"></div>
-<div id="touch"><div class="pad"><span></span><button data-k="up">▲</button><span></span><button data-k="left">◀</button><button data-k="down">▼</button><button data-k="right">▶</button></div><div style="display:flex;gap:10px;align-items:flex-end"><button id="coalBtn">COAL</button><button id="dropBtn">DROP<br>GIFT</button></div></div>
-<div id="overlay"><div class="card">
- <h1>🎅 Questionable Christmas Run</h1>
- <p>Santa is running late, the reindeer ate beans, and 4,000 houses are waiting. Bomb every roof with a present.</p>
- <ul><li><b>A / D</b> — steer (soft &amp; forgiving)</li><li><b>W / S</b> — speed up / slow down</li><li><b>Space</b> — drop a gift when the ring is <b style="color:#4be07a">green</b></li><li>Ring <b style="color:#ffb347">orange</b> = grumpy dog awake (it yeets your gift). Catch 🍪 for a sugar rush and 🥛 for a life. Dodge geese, planes, giant trees &amp; wires.</li></ul><br><br>
- <button class="btn" id="startBtn">Ho Ho GO!</button> <button class="btn" id="menuBtn" style="background:linear-gradient(#3f8fe0,#276bb8)">🛍 Shop &amp; settings</button>
-</div></div>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+  >
+  <meta name="theme-color" content="#18243d">
 
-<div id="over" class="hidden"><div class="card"><h1>💥 Sleigh down!</h1><p id="overText"></p><p id="topRuns" style="font-size:13px"></p><button class="btn" id="againBtn">Fly again</button> <button class="btn" id="shareBtn" style="background:linear-gradient(#3f8fe0,#276bb8)">📋 Share score</button> <button class="btn" id="menuBtn2" style="background:linear-gradient(#3f8fe0,#276bb8)">🛍 Shop</button></div></div>
-<div class="panel" id="tip"></div>
-<div id="pause" class="hidden"><div class="card"><h1>⏸ Menu</h1>
-<p>🎵 Music <input type="range" id="musicVol" min="0" max="1" step=".05" value="1"> &nbsp; 🔊 Effects <input type="range" id="sfxVol" min="0" max="1" step=".05" value="1"></p>
-<p style="margin:6px 0"><b>🛍 Sleigh shop</b> (spend candy canes 🍬)</p><div id="shop"></div>
-<p style="margin:10px 0 4px"><b>🏅 Achievements</b></p><div id="achList" style="font-size:13px;line-height:1.6;text-align:left"></div>
-<p style="font-size:12px;opacity:.8">A/D steer · W/S speed · Space gift · X coal · C front cam · M music · P pause · R restart</p>
-<button class="btn" id="resumeBtn">Resume</button></div></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/6.49.0/babylon.js"></script>
-<script src="java.js"></script>
+  <title>Santa's Sleigh - Questionable Christmas Run</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Game rendering -->
+  <canvas id="c"></canvas>
+  <canvas id="rainFx"></canvas>
+  <div id="blackout"></div>
+
+  <!-- Game statistics -->
+  <div class="panel" id="stats">
+    <div class="stat">
+      <span>Score</span>
+      <b id="score">0</b>
+    </div>
+    <div class="stat">
+      <span>Gifts delivered</span>
+      <b id="delivered">0</b>
+    </div>
+    <div class="stat">
+      <span>Oopsies</span>
+      <b id="misses">0</b>
+    </div>
+    <div class="stat">
+      <span>Candy canes 🍬</span>
+      <b id="canes">0</b>
+    </div>
+    <div class="stat">
+      <span>Power-ups</span>
+      <b id="power">—</b>
+    </div>
+    <div class="stat">
+      <span>Lives</span>
+      <b id="lives">❤️❤️❤️</b>
+    </div>
+    <div class="stat">
+      <span>Distance</span>
+      <b id="dist">0 m</b>
+    </div>
+    <div class="stat">
+      <span>Best</span>
+      <b id="best">0 m</b>
+    </div>
+  </div>
+
+  <!-- Gameplay messages -->
+  <div class="panel" id="quip">
+    <span id="quipText">
+      🎁 Line up the <b style="color:#4be07a">GREEN</b> ring, then hit <b>Space</b>
+    </span>
+    <small>Gold beacons = houses ahead</small>
+  </div>
+
+  <!-- Game controls -->
+  <div class="panel" id="soundBtn">🔊 Sound: ON</div>
+  <div class="panel" id="musicBtn">🎵 Music: ON</div>
+  <div class="panel" id="camBtn">📸 Front cam: OFF</div>
+  <div class="panel" id="pauseBtn">⏸ Pause (P)</div>
+
+  <!-- House radar -->
+  <div class="panel" id="radar">
+    <div class="rl">HOUSES AHEAD</div>
+  </div>
+
+  <!-- Keyboard instructions -->
+  <div class="panel" id="hint">
+    <kbd>A</kbd> <kbd>D</kbd> Steer ·
+    <kbd>W</kbd> <kbd>S</kbd> Speed ·
+    <kbd>Space</kbd> <span style="color:#4be07a">🎁 Gift</span> ·
+    <kbd>X</kbd> <span style="color:#ff5555">🪨 Coal</span> ·
+    <kbd>M</kbd> Music ·
+    <kbd>C</kbd> Front cam ·
+    <kbd>P</kbd> Pause ·
+    <kbd>R</kbd> Restart
+  </div>
+
+  <!-- Notifications -->
+  <div id="toast"></div>
+
+  <!-- Mobile controls -->
+  <div id="touch">
+    <div class="pad">
+      <span></span>
+      <button type="button" data-k="up">▲</button>
+      <span></span>
+
+      <button type="button" data-k="left">◀</button>
+      <button type="button" data-k="down">▼</button>
+      <button type="button" data-k="right">▶</button>
+    </div>
+
+    <div style="display:flex; gap:10px; align-items:flex-end">
+      <button type="button" id="coalBtn">🪨 COAL</button>
+      <button type="button" id="dropBtn">🎁 DROP<br>GIFT</button>
+    </div>
+  </div>
+
+  <!-- Start screen -->
+  <div id="overlay">
+    <div class="card">
+      <h1>🎅 Questionable Christmas Run</h1>
+
+      <p>
+        Santa is running late, the reindeer ate beans,
+        and thousands of houses are waiting.
+        Deliver presents, punish the naughty, and
+        try not to crash the sleigh!
+      </p>
+
+      <ul>
+        <li>
+          <b>A / D</b> — Steer left and right
+        </li>
+
+        <li>
+          <b>W / S</b> — Speed up and slow down
+        </li>
+
+        <li>
+          <b>Space</b> — Drop presents on
+          <b style="color:#4be07a">GREEN-RING houses</b>
+        </li>
+
+        <li>
+          <b>X</b> — Drop coal on
+          <b style="color:#ff5555">RED naughty houses</b>
+        </li>
+
+        <li>
+          🎁 <b>Rooftop robbers</b> — Knock them down
+          with presents or coal!
+        </li>
+
+        <li>
+          ⚡ <b>Power-ups</b> — Collect special bonuses
+          along the way
+        </li>
+
+        <li>
+          🍪 <b>Cookie</b> — Sugar rush and bonus points
+        </li>
+
+        <li>
+          🥛 <b>Milk</b> — Restore a life
+        </li>
+
+        <li>
+          <b style="color:#ffb347">🟠 ORANGE ring</b> —
+          Watch out! The grumpy dog is awake
+        </li>
+
+        <li>
+          Dodge geese, planes, giant trees, power lines,
+          and whatever else Christmas throws at you.
+        </li>
+      </ul>
+
+      <br>
+
+      <button type="button" class="btn" id="startBtn">
+        Ho Ho GO!
+      </button>
+
+      <button
+        type="button"
+        class="btn"
+        id="menuBtn"
+        style="background:linear-gradient(#3f8fe0,#276bb8)"
+      >
+        🛍 Shop &amp; settings
+      </button>
+    </div>
+  </div>
+
+  <!-- Game over screen -->
+  <div id="over" class="hidden">
+    <div class="card">
+      <h1>💥 Sleigh down!</h1>
+
+      <p id="overText"></p>
+      <p id="topRuns" style="font-size:13px"></p>
+
+      <button type="button" class="btn" id="againBtn">
+        Fly again
+      </button>
+
+      <button
+        type="button"
+        class="btn"
+        id="shareBtn"
+        style="background:linear-gradient(#3f8fe0,#276bb8)"
+      >
+        📋 Share score
+      </button>
+
+      <button
+        type="button"
+        class="btn"
+        id="menuBtn2"
+        style="background:linear-gradient(#3f8fe0,#276bb8)"
+      >
+        🛍 Shop
+      </button>
+    </div>
+  </div>
+
+  <!-- Gameplay tips -->
+  <div class="panel" id="tip"></div>
+
+  <!-- Pause menu, shop and achievements -->
+  <div id="pause" class="hidden">
+    <div class="card">
+      <h1>⏸ Menu</h1>
+
+      <p>
+        🎵 Music
+        <input
+          type="range"
+          id="musicVol"
+          min="0"
+          max="1"
+          step="0.05"
+          value="1"
+        >
+
+        &nbsp;
+
+        🔊 Effects
+        <input
+          type="range"
+          id="sfxVol"
+          min="0"
+          max="1"
+          step="0.05"
+          value="1"
+        >
+      </p>
+
+      <p style="margin:6px 0">
+        <b>🛍 Sleigh shop</b>
+        (Spend candy canes 🍬)
+      </p>
+
+      <div id="shop"></div>
+
+      <p style="margin:10px 0 4px">
+        <b>🏅 Achievements</b>
+      </p>
+
+      <div
+        id="achList"
+        style="font-size:13px; line-height:1.6; text-align:left"
+      ></div>
+
+      <p style="font-size:12px; opacity:.8">
+        A/D Steer · W/S Speed ·
+        <span style="color:#4be07a">Space Gift</span> ·
+        <span style="color:#ff5555">X Coal</span> ·
+        C Front cam · M Music · P Pause · R Restart
+      </p>
+
+      <button type="button" class="btn" id="resumeBtn">
+        Resume
+      </button>
+    </div>
+  </div>
+
+  <!-- Game engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/6.49.0/babylon.js"></script>
+  <script src="java.js"></script>
 </body>
 </html>
